@@ -1,7 +1,7 @@
-90b07befb9e54345aeee8643f7685c0c *DESCRIPTION
+29014cc7bc5f37780cdf3fa4adf2993d *DESCRIPTION
 d85a10bf530f1ebd4d91c0ab5818e933 *LICENSE
 9e01a7bd9023c607f56e2866cc2c7981 *NAMESPACE
-3712e03b15272f286cd12d97dd331af7 *NEWS.md
+db7f397ffa2bc4299a951a590183d14a *NEWS.md
 55c0e724e1fce6b7d73959feac17c64c *R/check_connection.R
 df6cc46bc7fae1a55b713f3d5065b35a *R/condathis-package.R
 c946ab8474fc97b04fdaf94e46654003 *R/create_base_env.R
@@ -13,7 +13,7 @@ fa91133f9b409471f0904207f9fcf4bd *R/format_channels_args.R
 585874a58cdf1f5dd630c9dfaf0499ae *R/get_env_dir.R
 77c0a211b86d54f151ad98bdcbec7143 *R/get_install_dir.R
 6498408dd3b09c82c6ffb3439a82f0d7 *R/get_sys_arch.R
-fc5bf3dbba97125be20b5c4f2306b386 *R/install_micromamba.R
+43bac0e73b845d86f8a60a201029e885 *R/install_micromamba.R
 af029957a73d39f775407c9472fc6751 *R/install_packages.R
 88e0323ca3a88efb1e9020a3203c0476 *R/is_micromamba_available.R
 85b234ea2e3aec3edd23d32082588159 *R/list_envs.R
@@ -27,13 +27,13 @@ b7d77b99d55e9f477e51c13449e769f8 *R/parse_output.R
 baefa15dca1c95031f6db92ec09252a5 *R/parse_strategy_verbose.R
 2d54ee5adf8fbfc07c1de178d11035d4 *R/remove_env.R
 ddb93fb8fdf9e957d65a0a80bb1e1224 *R/rethrow_error_cmd.R
-d4f6e1c85e05dc08ce9e5e0b0df6810e *R/rethrow_error_run.R
+1904ea33df6490b52c25b1aa2deaebbc *R/rethrow_error_run.R
 f862ae36b066ef4c12eca0d3378d2a97 *R/run.R
 be63ce76ae38eeb148053e9769a2044f *R/run_bin.R
 6e9bf38f2ece23575f959f2dd30b5e47 *R/run_internal_native.R
 bc9a0ec29ccc5f7b416499394c7352f5 *R/symlink_micromamba_bin.R
 1494d0307e9f10b7428423af9d7d45f9 *R/with_sandbox_dir.R
-661bca4c15193bd905a408c6cd71fb51 *README.md
+6ef481899589e6e57c608356fd1939fa *README.md
 21d0a7f6f8bee590b12a5c1a51138e8b *inst/extdata/example.bam
 1cd424a09988c9f4bd2b782c6a85d1d8 *inst/extdata/sample1_L001_R1_001.fastq.gz
 4dab5d5c190beaf238196518c35477f8 *inst/extdata/sample1_L001_R2_001.fastq.gz
@@ -47,7 +47,7 @@ d46af758dfffdf7c11b62ef6f754c29b *man/figures/logo.png
 59745f9d71817dbc3208de94b1df8eb3 *man/get_env_dir.Rd
 b564e81f3a39cbd48b4ff1dbe93bd527 *man/get_install_dir.Rd
 8f9ce74eb37611e466a3be3286173693 *man/get_sys_arch.Rd
-bca05084c3d4a138e972c2161290cfbd *man/install_micromamba.Rd
+2d4e9ab9882bdf1e8b99f50fa6efade9 *man/install_micromamba.Rd
 badd9db32154270a45073dd2d728c145 *man/install_packages.Rd
 4982833e412b2cc5cbdf57978a4c1dca *man/list_envs.Rd
 7942c5e0f4752208cf462adc22324126 *man/list_packages.Rd
@@ -77,5 +77,5 @@ cdb3c4b7b8b15eb3fb16196ff66e783c *tests/testthat/test-native_cmd.R
 36637e7cd296cfbc39cbbc73daa42369 *tests/testthat/test-parse_strategy_verbose.R
 352027165554ff3f488175e64d1e38a0 *tests/testthat/test-remove_env.R
 adf7fd1d346f29b58432450be4cf6ab9 *tests/testthat/test-run.R
-775dd486de3d3aa5fc585319af23cf34 *tests/testthat/test-run_bin.R
+9ceb24c9de3283ce35c49afc3982a1b0 *tests/testthat/test-run_bin.R
 53096d62b71fc556bcf28deb5884786e *tests/testthat/test-run_output_file.R

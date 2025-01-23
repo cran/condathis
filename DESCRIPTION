@@ -1,6 +1,6 @@
 Package: condathis
 Title: Run Any CLI Tool on a 'Conda' Environment
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Lucio", "Queiroz", , "luciorqueiroz@gmail.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-6090-1834")),
@@ -23,9 +23,9 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 NeedsCompilation: no
-Packaged: 2024-12-10 17:23:21 UTC; luciorq
+Packaged: 2025-01-23 18:36:55 UTC; luciorq
 Author: Lucio Queiroz [aut, cre, cph] (<https://orcid.org/0000-0002-6090-1834>),
   Claudio Zanettini [aut, ctb] (<https://orcid.org/0000-0001-5043-8033>)
 Maintainer: Lucio Queiroz <luciorqueiroz@gmail.com>
 Repository: CRAN
-Date/Publication: 2024-12-11 16:00:01 UTC
+Date/Publication: 2025-01-23 19:00:09 UTC

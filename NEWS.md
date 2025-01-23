@@ -1,3 +1,13 @@
+# condathis 0.1.1
+
+## Minor improvements and fixes
+
+* Internal `micromamba` version bump to "2.0.5-0".
+
+* Fix error in `run_bin()` when `error = "continue"` and `cmd` is not on
+  PATH nor in the environment.
+  The expected behavior is to not fail (#23).
+
 # condathis 0.1.0
 
 * Initial submission to CRAN.
@@ -20,7 +30,7 @@
 
 ## Minor improvements and fixes
 
-* Improved error message in `list_packages()`when env don't exist (#21).
+* Improved error message in `list_packages()` when environment doesn't exist (#21).
 
 * Improved message in `install_packages()`.
 
