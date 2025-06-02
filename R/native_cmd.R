@@ -18,7 +18,8 @@ native_cmd <- function(conda_cmd,
                        verbose = "full",
                        error = c("cancel", "continue"),
                        stdout = "|",
-                       stderr = "|") {
+                       stderr = "|",
+                       stdin = NULL) {
   rlang::check_required(conda_cmd)
   error <- rlang::arg_match(error)
   if (isTRUE(identical(error, "cancel"))) {
@@ -29,9 +30,9 @@ native_cmd <- function(conda_cmd,
 
   umamba_bin_path <- micromamba_bin_path()
   env_root_dir <- get_install_dir()
-
+  env_envs_dir <- fs::path(env_root_dir, "envs")
   if (isFALSE(fs::file_exists(umamba_bin_path))) {
-    install_micromamba(force = TRUE)
+    install_micromamba(force = TRUE, verbose = verbose)
   }
   umamba_bin_path <- base::normalizePath(umamba_bin_path, mustWork = FALSE)
   tmp_dir_path <- withr::local_tempdir(pattern = "mamba-tmp")
@@ -40,7 +41,7 @@ native_cmd <- function(conda_cmd,
       `TMPDIR` = tmp_dir_path,
       `CONDA_SHLVL` = "0",
       `MAMBA_SHLVL` = "0",
-      `CONDA_ENVS_PATH` = "",
+      `CONDA_ENVS_PATH` = env_envs_dir,
       `CONDA_ROOT_PREFIX` = "",
       `CONDA_PREFIX` = "",
       `MAMBA_ENVS_PATH` = "",
@@ -67,14 +68,15 @@ native_cmd <- function(conda_cmd,
   }
   callback_fun_out <- NULL
   callback_fun_err <- NULL
+
   px_res <- processx::run(
     command = fs::path_real(umamba_bin_path),
     args = c(
       "--no-rc",
       "--no-env",
-      conda_cmd,
       "-r",
       env_root_dir,
+      conda_cmd,
       conda_args,
       ...
     ),
@@ -85,7 +87,9 @@ native_cmd <- function(conda_cmd,
     stdout_line_callback = callback_fun_out,
     stderr = stderr,
     stderr_line_callback = callback_fun_err,
+    stdin = stdin,
     error_on_status = error_var
   )
+
   return(invisible(px_res))
 }

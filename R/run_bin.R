@@ -39,7 +39,8 @@ run_bin <- function(
     verbose = "silent",
     error = c("cancel", "continue"),
     stdout = "|",
-    stderr = "|") {
+    stderr = "|",
+    stdin = NULL) {
   error <- rlang::arg_match(error)
   if (isTRUE(identical(error, "cancel"))) {
     error_var <- TRUE
@@ -55,7 +56,10 @@ run_bin <- function(
   env_dir <- get_env_dir(env_name = env_name)
   cmd_path <- fs::path(env_dir, "bin", cmd)
 
-  if (isFALSE(fs::file_exists(cmd_path)) && isTRUE(fs::file_exists(Sys.which(cmd)))) {
+  if (
+    isFALSE(fs::file_exists(cmd_path)) &&
+      isTRUE(fs::file_exists(Sys.which(cmd)))
+  ) {
     cmd_path <- normalizePath(Sys.which(cmd), mustWork = FALSE)
   }
   tmp_dir_path <- withr::local_tempdir(pattern = "condathis-tmp")
@@ -87,7 +91,6 @@ run_bin <- function(
   if (isTRUE(is.null(args_vector))) {
     args_vector <- character(length = 0L)
   }
-
   px_res <- rethrow_error_run(
     expr = {
       processx::run(
@@ -98,10 +101,10 @@ run_bin <- function(
         echo = verbose_output,
         stdout = stdout,
         stderr = stderr,
+        stdin = stdin,
         error_on_status = error_var
       )
     }
   )
-
   return(invisible(px_res))
 }

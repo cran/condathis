@@ -32,6 +32,9 @@
 #'   returned by `run()`.
 #'   A character string can be used to define a file path to be used as standard error. e.g: "error.txt".
 #'
+#' @param stdin Default: `NULL` (no `stdin` stream).
+#'   A character string can be used to define a file path to be used as standard input. e.g: "input.txt".
+#'
 #' @return An object of class `list` representing the result of the command execution.
 #'   Contains information about the standard output, standard error, and exit status of the command.
 #'
@@ -70,7 +73,8 @@ run <- function(cmd,
                 ),
                 error = c("cancel", "continue"),
                 stdout = "|",
-                stderr = "|") {
+                stderr = "|",
+                stdin = NULL) {
   rlang::check_required(cmd)
 
   if (is.null(cmd)) {
@@ -81,17 +85,23 @@ run <- function(cmd,
       class = "condathis_run_null_cmd"
     )
   }
-
-  error <- rlang::arg_match(error)
-  method <- rlang::arg_match(method)
   # verbose <- rlang::arg_match(verbose)
+  method <- rlang::arg_match(method)
+  error <- rlang::arg_match(error)
+  # error_var is used by rethrow_error_run env
+  if (isTRUE(identical(error, "cancel"))) {
+    error_var <- TRUE
+  } else {
+    error_var <- FALSE
+  }
+
   invisible_res <- parse_strategy_verbose(strategy = verbose[1])
 
   method_to_use <- method[1]
 
   if (isTRUE(method_to_use %in% c("native", "auto"))) {
     if (isFALSE(env_exists(env_name = "condathis-env"))) {
-      create_base_env()
+      create_base_env(verbose = "silent")
     }
 
     px_res <- rethrow_error_run(
@@ -103,7 +113,8 @@ run <- function(cmd,
           verbose = verbose,
           error = error,
           stdout = stdout,
-          stderr = stderr
+          stderr = stderr,
+          stdin = stdin
         )
       }
     )

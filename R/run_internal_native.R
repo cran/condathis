@@ -12,9 +12,13 @@ run_internal_native <- function(cmd,
                                 verbose = FALSE,
                                 error = c("cancel", "continue"),
                                 stdout = "|",
-                                stderr = "|") {
+                                stderr = "|",
+                                stdin = NULL) {
   if (isTRUE(base::Sys.info()["sysname"] == "Windows")) {
-    micromamba_bat_path <- fs::path(get_install_dir(), "condabin", "micromamba", ext = "bat")
+    micromamba_bat_path <- fs::path(
+      get_install_dir(), "condabin", "micromamba",
+      ext = "bat"
+    )
     if (isFALSE(fs::file_exists(micromamba_bat_path))) {
       catch_res <- rlang::catch_cnd(
         expr = {
@@ -25,9 +29,15 @@ run_internal_native <- function(cmd,
           )
         }
       )
-      mamba_bat_path <- fs::path(get_install_dir(), "condabin", "mamba", ext = "bat")
-      if (isTRUE(fs::file_exists(mamba_bat_path)) &&
-        isFALSE(fs::file_exists(micromamba_bat_path))) {
+      base::rm(catch_res)
+      mamba_bat_path <- fs::path(
+        get_install_dir(), "condabin", "mamba",
+        ext = "bat"
+      )
+      if (
+        isTRUE(fs::file_exists(mamba_bat_path)) &&
+          isFALSE(fs::file_exists(micromamba_bat_path))
+      ) {
         fs::file_copy(mamba_bat_path, micromamba_bat_path, overwrite = TRUE)
       }
     }
@@ -43,7 +53,8 @@ run_internal_native <- function(cmd,
     verbose = verbose,
     error = error,
     stdout = stdout,
-    stderr = stderr
+    stderr = stderr,
+    stdin = stdin
   )
   return(invisible(px_res))
 }
