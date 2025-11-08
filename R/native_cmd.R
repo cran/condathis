@@ -12,15 +12,24 @@
 #'
 #' @keywords internal
 #' @noRd
-native_cmd <- function(conda_cmd,
-                       conda_args = NULL,
-                       ...,
-                       verbose = "full",
-                       error = c("cancel", "continue"),
-                       stdout = "|",
-                       stderr = "|",
-                       stdin = NULL) {
+native_cmd <- function(
+  conda_cmd,
+  conda_args = NULL,
+  ...,
+  verbose = c(
+    "output",
+    "silent",
+    "cmd",
+    "spinner",
+    "full"
+  ),
+  error = c("cancel", "continue"),
+  stdout = "|",
+  stderr = "|",
+  stdin = NULL
+) {
   rlang::check_required(conda_cmd)
+
   error <- rlang::arg_match(error)
   if (isTRUE(identical(error, "cancel"))) {
     error_var <- TRUE
@@ -28,11 +37,20 @@ native_cmd <- function(conda_cmd,
     error_var <- FALSE
   }
 
+  rlang::check_dots_unnamed()
+
+  verbose_list <- parse_strategy_verbose(verbose = verbose)
+
+  verbose_output <- verbose_list$output
+  if (isFALSE(stderr %in% c("|", ""))) {
+    verbose_output <- FALSE
+  }
+
   umamba_bin_path <- micromamba_bin_path()
   env_root_dir <- get_install_dir()
   env_envs_dir <- fs::path(env_root_dir, "envs")
   if (isFALSE(fs::file_exists(umamba_bin_path))) {
-    install_micromamba(force = TRUE, verbose = verbose)
+    install_micromamba(force = TRUE, verbose = verbose_list$internal_verbose)
   }
   umamba_bin_path <- base::normalizePath(umamba_bin_path, mustWork = FALSE)
   tmp_dir_path <- withr::local_tempdir(pattern = "mamba-tmp")
@@ -42,9 +60,11 @@ native_cmd <- function(conda_cmd,
       `CONDA_SHLVL` = "0",
       `MAMBA_SHLVL` = "0",
       `CONDA_ENVS_PATH` = env_envs_dir,
+      `CONDA_ENVS_DIRS` = NULL,
       `CONDA_ROOT_PREFIX` = "",
       `CONDA_PREFIX` = "",
       `MAMBA_ENVS_PATH` = "",
+      `MAMBA_ENVS_DIRS` = "",
       `MAMBA_ROOT_PREFIX` = "",
       `MAMBA_PREFIX` = "",
       `CONDARC` = "",
@@ -58,14 +78,7 @@ native_cmd <- function(conda_cmd,
       `R_HOME` = ""
     )
   )
-  verbose_list <- parse_strategy_verbose(strategy = verbose)
-  verbose_cmd <- verbose_list$cmd
-  verbose_output <- verbose_list$output
-  spinner_flag <- rlang::is_interactive()
 
-  if (isFALSE(stderr %in% c("|", ""))) {
-    verbose_output <- FALSE
-  }
   callback_fun_out <- NULL
   callback_fun_err <- NULL
 
@@ -80,8 +93,8 @@ native_cmd <- function(conda_cmd,
       conda_args,
       ...
     ),
-    spinner = spinner_flag,
-    echo_cmd = verbose_cmd,
+    spinner = verbose_list$spinner_flag,
+    echo_cmd = verbose_list$cmd,
     echo = verbose_output,
     stdout = stdout,
     stdout_line_callback = callback_fun_out,

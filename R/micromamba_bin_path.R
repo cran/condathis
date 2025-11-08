@@ -4,7 +4,7 @@
 #' by the `condathis` package. The path is determined based on the system's
 #' operating system and architecture.
 #'
-#' @return A character string representing the full path to the `micromamba` executable.
+#' @returns A character string representing the full path to the `micromamba` executable.
 #'   The path differs depending on the operating system:
 #'   \describe{
 #'     \item{Windows}{`<install_dir>/micromamba/Library/bin/micromamba.exe`}
@@ -24,7 +24,11 @@ micromamba_bin_path <- function() {
   output_dir <- get_install_dir()
   if (isTRUE(stringr::str_detect(sys_arch, "^Windows"))) {
     umamba_bin_path <- fs::path(
-      output_dir, "micromamba", "Library", "bin", "micromamba.exe"
+      output_dir,
+      "micromamba",
+      "Library",
+      "bin",
+      "micromamba.exe"
     )
   } else {
     umamba_bin_path <- fs::path(output_dir, "micromamba", "bin", "micromamba")

@@ -12,13 +12,13 @@ create_env(
   method = c("native", "auto"),
   additional_channels = NULL,
   platform = NULL,
-  verbose = "silent",
+  verbose = c("output", "silent", "cmd", "spinner", "full"),
   overwrite = FALSE
 )
 }
 \arguments{
 \item{packages}{Character vector. Names of the packages, and
-version strings if necessary, e.g. 'python=3.11'. The use of the \code{packages}
+version strings if necessary, e.g. 'python=3.13'. The use of the \code{packages}
 argument assumes that env_file is not used.}
 
 \item{env_file}{Character. Path to the YAML file with Conda Environment
@@ -48,13 +48,25 @@ Note: on Apple Silicon MacOS will use "osx-64" instead of "osx-arm64"
 if Rosetta 2 is available and any of the \code{packages} is not available
 for "osx-arm64".}
 
-\item{verbose}{Character string specifying the verbosity level of the function's output. Acceptable values are:
+\item{verbose}{Character string specifying the verbosity level of the
+function's output.
+Acceptable values are:
 \itemize{
-\item \strong{"silent"}: Suppress all output from internal command-line tools. Equivalent to \code{FALSE}.
+\item \strong{"output"}: Print the standard output and error from the command-line
+tool to the screen.
+Note that the order of the standard output and error lines may not be
+correct, as standard output is typically buffered.
+\item \strong{"silent"}: Suppress all output from internal command-line tools.
+Equivalent to \code{FALSE}.
 \item \strong{"cmd"}: Print the internal command(s) passed to the command-line tool.
-\item \strong{"output"}: Print the standard output and error from the command-line tool to the screen. Note that the order of the standard output and error lines may not be correct, as standard output is typically buffered. If the standard output and/or error is redirected to a file or they are ignored, they will not be echoed.
-\item \strong{"full"}: Print both the internal command(s) (\code{"cmd"}) and their standard output and error (\code{"output"}). Equivalent to \code{TRUE}.
-Logical values \code{FALSE} and \code{TRUE} are also accepted for backward compatibility but are \emph{soft-deprecated}. Please use \code{"silent"} and \code{"full"} respectively instead.
+If the standard output and/or error is redirected to a file or they are
+ignored, they will not be echoed.
+Equivalent to \code{TRUE}.
+\item \strong{"full"}: Print both the internal command(s) (\code{"cmd"}) and their
+standard output and error (\code{"output"}).
+\item Logical values \code{FALSE} and \code{TRUE} are also accepted for backward
+compatibility but are \emph{soft-deprecated}.
+Please use \code{"silent"} or \code{"output"} instead.
 }}
 
 \item{overwrite}{Logical. Should environment always be overwritten?

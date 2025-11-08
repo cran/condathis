@@ -11,7 +11,7 @@
 #' @param force A logical value indicating whether to overwrite an existing symlink.
 #'   Defaults to `FALSE`.
 #'
-#' @return Invisibly returns the path to the `micromamba` symlink created or verified.
+#' @returns Invisibly returns the path to the `micromamba` symlink created or verified.
 #'
 #' @keywords internal
 #' @noRd
@@ -22,7 +22,11 @@ symlink_micromamba_bin <- function(path = NULL, force = FALSE) {
     user_umamba_path <- path
   }
   umamba_path <- micromamba_bin_path()
-  if (isTRUE(force) && isTRUE(fs::file_exists(user_umamba_path)) && isTRUE(fs::file_exists(umamba_path))) {
+  if (
+    isTRUE(force) &&
+      isTRUE(fs::file_exists(user_umamba_path)) &&
+      isTRUE(fs::file_exists(umamba_path))
+  ) {
     fs::file_delete(umamba_path)
   }
   if (isFALSE(fs::file_exists(umamba_path)) || isTRUE(force)) {

@@ -6,17 +6,19 @@
 #'
 #' @keywords internal
 #' @noRd
-packages_search_native <- function(packages,
-                                   channels = c(
-                                     "bioconda",
-                                     "conda-forge"
-                                   ),
-                                   platform = NULL,
-                                   additional_channels = NULL,
-                                   verbose = "silent") {
+packages_search_native <- function(
+  packages,
+  channels = c(
+    "bioconda",
+    "conda-forge"
+  ),
+  platform = NULL,
+  additional_channels = NULL,
+  verbose = "silent"
+) {
   channels_arg <- format_channels_args(
-    additional_channels,
-    channels
+    channels,
+    additional_channels
   )
   if (is.null(platform)) {
     platform_args <- NULL
@@ -28,7 +30,8 @@ packages_search_native <- function(packages,
     px_res <- native_cmd(
       conda_cmd = "search",
       conda_args = c(
-        "-n", "condathis-env",
+        "-n",
+        "condathis-env",
         "--yes",
         "--json",
         "--no-channel-priority",

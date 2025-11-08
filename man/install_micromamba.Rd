@@ -5,16 +5,16 @@
 \title{Install Micromamba Binaries in the \code{condathis} Controlled Path}
 \usage{
 install_micromamba(
-  micromamba_version = "2.1.1-0",
+  micromamba_version = "2.3.3-0",
   timeout_limit = 3600,
   download_method = "auto",
   force = FALSE,
-  verbose = "full"
+  verbose = c("output", "silent", "cmd", "spinner", "full")
 )
 }
 \arguments{
 \item{micromamba_version}{Character string specifying the version of
-Micromamba to download. Defaults to \code{"2.1.1-0"}.}
+Micromamba to download. Defaults to \code{"2.3.3-0"}.}
 
 \item{timeout_limit}{Numeric value specifying the timeout limit for
 downloading the Micromamba
@@ -30,7 +30,7 @@ system or \code{condathis} controlled path. Defaults to FALSE.}
 
 \item{verbose}{Character string indicating the verbosity level of the
 function.
-Can be one of \code{"full"}, \code{"output"}, \code{"silent"}. Defaults to \code{"full"}.}
+Can be one of \code{"full"}, \code{"output"}, \code{"silent"}. Defaults to \code{"output"}.}
 }
 \value{
 Invisibly returns the path to the installed Micromamba binary.

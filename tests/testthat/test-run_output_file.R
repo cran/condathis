@@ -1,14 +1,13 @@
-# create_env(env_name = "condathis-test-env", verbose = FALSE)
-
-test_that("Output redirection to file", {
+testthat::test_that("Output redirection to file", {
   testthat::skip_if_offline()
   testthat::skip_on_cran()
 
-  create_env(env_name = "condathis-test-env", verbose = "silent")
+  create_env(env_name = "condathis-output-test-env", verbose = "silent")
   temp_output_file <- fs::file_temp("test_output", ext = "txt")
   px_res <- run(
-    "ls", "-lah",
-    env_name = "condathis-test-env",
+    "ls",
+    "-lah",
+    env_name = "condathis-output-test-env",
     verbose = FALSE,
     stdout = temp_output_file
   )
@@ -28,8 +27,9 @@ test_that("Output redirection to file", {
 
   # test_that("Internal output", {
   px_res <- run(
-    "echo", "Hello World!",
-    env_name = "condathis-test-env",
+    "echo",
+    "Hello World!",
+    env_name = "condathis-output-test-env",
     verbose = FALSE,
     stdout = "|"
   )
@@ -45,8 +45,10 @@ test_that("Output redirection to file", {
   # test_that("Error/warning redirection to file", {
   temp_output_file <- fs::file_temp("test_stderr", ext = "txt")
   px_res <- run(
-    "ls", "-lah", "MissingFILE",
-    env_name = "condathis-test-env",
+    "ls",
+    "-lah",
+    "MissingFILE",
+    env_name = "condathis-output-test-env",
     verbose = FALSE,
     stderr = temp_output_file,
     error = "continue"
@@ -62,7 +64,5 @@ test_that("Output redirection to file", {
     NULL
   )
   fs::file_delete(temp_output_file)
-  remove_env(env_name = "condathis-test-env", verbose = FALSE)
+  remove_env(env_name = "condathis-output-test-env", verbose = FALSE)
 })
-
-# remove_env(env_name = "condathis-test-env", verbose = FALSE)

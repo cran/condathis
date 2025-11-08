@@ -28,14 +28,16 @@ testthat::test_that("conda env is created", {
 
   px_res <- create_env(
     packages = c("r-base=4.1.3", "r-devtools"),
-    env_name = "condathis-test-env"
+    env_name = "condathis-create-test-env"
   )
-  expect_equal(px_res$status, 0L)
+  testthat::expect_equal(px_res$status, 0L)
 
   withr::with_path(
     new = dirname(micromamba_bin_path()),
     code = {
+      # print(Sys.getenv("PATH"))
       umamba_path <- micromamba_user_installed()
+      # print(umamba_path)
     },
     action = "replace"
   )
@@ -47,16 +49,16 @@ testthat::test_that("conda env is created", {
 
   run_res <- run(
     "Rmissing",
-    env_name = "condathis-test-env",
+    env_name = "condathis-create-test-env",
     error = "continue"
   )
-  expect_true(run_res$status != 0L)
+  testthat::expect_true(run_res$status != 0L)
 
   testthat::expect_error(
     object = {
       run(
         "Rmissing",
-        env_name = "condathis-test-env",
+        env_name = "condathis-create-test-env",
         verbose = FALSE,
         error = "cancel"
       )
@@ -65,30 +67,40 @@ testthat::test_that("conda env is created", {
   )
 
   run_res <- run(
-    "R", "-s", "-q", "--version",
-    env_name = "condathis-test-env",
+    "R",
+    "-s",
+    "-q",
+    "--version",
+    env_name = "condathis-create-test-env",
     verbose = "silent",
     error = "continue"
   )
 
   run_bin_res <- run_bin(
-    "R", "-s", "-q", "--version",
-    env_name = "condathis-test-env",
+    "R",
+    "-s",
+    "-q",
+    "--version",
+    env_name = "condathis-create-test-env",
     verbose = "silent",
     error = "continue"
   )
 
-  expect_equal(run_res$status, run_bin_res$status)
+  testthat::expect_equal(run_res$status, run_bin_res$status)
 
-  expect_equal(run_res$status, 0L)
+  testthat::expect_equal(run_res$status, 0L)
 
   r_version_output <- run_res$stdout
+  # Check both stdout and stderr for R version output
+  # + On Windows that can vary
   if (isFALSE(nzchar(r_version_output))) {
     r_version_output <- run_res$stderr
   }
-  expect_true(stringr::str_detect(r_version_output, "R version 4.1.3"))
+  testthat::expect_true(
+    stringr::str_detect(r_version_output, "R version 4.1.3")
+  )
 
-  pkgs_list_res <- list_packages(env_name = "condathis-test-env")
+  pkgs_list_res <- list_packages(env_name = "condathis-create-test-env")
 
   testthat::expect_true(ncol(pkgs_list_res) > 0L)
 
@@ -104,9 +116,13 @@ testthat::test_that("conda env is created", {
     new = list(`MY_VAR_1` = "HELLO FROM OUTSIDE"),
     code = {
       px_res <- run(
-        "R", "-q", "-s", "-e", "print(Sys.getenv('MY_VAR_1'))",
-        env_name = "condathis-test-env",
-        verbose = FALSE
+        "R",
+        "-q",
+        "-s",
+        "-e",
+        "print(Sys.getenv('MY_VAR_1'))",
+        env_name = "condathis-create-test-env",
+        verbose = "silent"
       )
     }
   )
@@ -121,14 +137,15 @@ testthat::test_that("conda env is created", {
 
   install_res <- install_packages(
     packages = c("python=3.8.16"),
-    env_name = "condathis-test-env",
+    env_name = "condathis-create-test-env",
     verbose = FALSE
   )
   expect_equal(install_res$status, 0L)
 
   inst_res <- run(
-    "python", "--version",
-    env_name = "condathis-test-env",
+    "python",
+    "--version",
+    env_name = "condathis-create-test-env",
     verbose = FALSE
   )
 
@@ -136,13 +153,13 @@ testthat::test_that("conda env is created", {
 
   expect_true(stringr::str_detect(inst_res$stdout, "Python 3.8.16"))
 
-  expect_true(env_exists(env_name = "condathis-test-env"))
+  expect_true(env_exists(env_name = "condathis-create-test-env"))
 
-  px_res <- remove_env(env_name = "condathis-test-env", verbose = FALSE)
+  px_res <- remove_env(env_name = "condathis-create-test-env", verbose = FALSE)
 
   expect_equal(px_res$status, 0L)
 
-  expect_false("condathis-test-env" %in% list_envs())
+  expect_false("condathis-create-test-env" %in% list_envs())
 })
 
 testthat::test_that("Create conda env from file", {
@@ -152,24 +169,27 @@ testthat::test_that("Create conda env from file", {
   px_res <- create_env(
     env_file = fs::path_package("condathis", "extdata", "stat-env.yml"),
     method = "native",
-    env_name = "condathis-test-env",
+    env_name = "condathis-create-file-test-env",
     verbose = "silent"
   )
   expect_equal(px_res$status, 0L)
 
   current_envs <- list_envs()
 
-  expect_true("condathis-test-env" %in% current_envs)
+  expect_true("condathis-create-file-test-env" %in% current_envs)
 
-  expect_true(env_exists(env_name = "condathis-test-env"))
+  expect_true(env_exists(env_name = "condathis-create-file-test-env"))
 
-  px_res <- remove_env(env_name = "condathis-test-env", verbose = FALSE)
+  px_res <- remove_env(
+    env_name = "condathis-create-file-test-env",
+    verbose = FALSE
+  )
 
   expect_equal(px_res$status, 0L)
 
   current_envs <- list_envs()
 
-  expect_false("condathis-test-env" %in% current_envs)
+  expect_false("condathis-create-file-test-env" %in% current_envs)
 
-  expect_false(env_exists(env_name = "condathis-test-env"))
+  expect_false(env_exists(env_name = "condathis-create-file-test-env"))
 })
