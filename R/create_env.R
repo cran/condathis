@@ -1,58 +1,49 @@
-#' Create a Conda Environment
+#' Create a Conda environment
 #'
-#' Create Conda Environment with specific packages installed to be used
-#'   by `run()`.
+#' Creates a Conda environment managed by `condathis` and installs dependencies
+#' from package specs or from an environment file.
 #'
-#' @param packages Character vector. Names of the packages, and
-#'   version strings if necessary, e.g. 'python=3.13'. The use of the `packages`
-#'   argument assumes that env_file is not used.
-#'
-#' @param env_file Character. Path to the YAML file with Conda Environment
-#'   description. If this argument is used, the `packages` argument should not
-#'   be included in the command.
-#'
-#' @param env_name Character. Name of the Conda environment where the packages
-#'   are going to be installed. Defaults to 'condathis-env'.
-#'
-#' @param channels Character vector. Names of the channels to be included.
-#'   By default 'c("bioconda", "conda-forge")' are used for solving
-#'   dependencies.
-#'
-#' @param additional_channels Character. Additional Channels to be added to the
-#'   default ones.
-#'
-#' @param method Character. Backend method to run `micromamba`, the default is
-#'   "auto" running "native" with the `micromamba` binaries installed
-#'   by `condathis`.
-#'   This argument is **soft deprecated** as changing it don't really do
-#'   anything.
-#'
-#' @param platform Character. Platform to search for `packages`.
-#'   Defaults to `NULL` which will use the current platform.
-#'   E.g. "linux-64", "linux-32", "osx-64", "win-64", "win-32", "noarch".
-#'   Note: on Apple Silicon MacOS will use "osx-64" instead of "osx-arm64"
-#'     if Rosetta 2 is available and any of the `packages` is not available
-#'     for "osx-arm64".
-#'
+#' @param packages Character vector of package MatchSpec strings.
+#'   Examples: `"python=3.13"`, `"bioconda::fastqc==0.12.1"`.
+#'   Defaults to `NULL`.
+#' @param env_file Character string with the path to an environment YAML file.
+#'   Defaults to `NULL`.
+#'   When provided, it is passed to `micromamba create -f`.
+#' @param env_name Character string with the target environment name.
+#'   Defaults to `"condathis-env"`.
+#' @param channels Character vector with channel names used for dependency
+#'   resolution. Defaults to `c("conda-forge", "bioconda")`.
+#' @param channel_priority Character string with channel priority mode.
+#'   Supported values are `"disabled"`, `"strict"`, and `"flexible"`.
+#'   Defaults to `"disabled"`.
+#' @param additional_channels Character vector of additional channels appended
+#'   to `channels`. Defaults to `NULL`.
+#' @param method Character string with the backend execution strategy.
+#'   Supported values are `"native"` and `"auto"`.
+#'   Defaults to `"native"`.
+#'   This argument is soft-deprecated and currently does not change behavior.
+#' @param platform Character string with the platform used for dependency
+#'   solving (for example, `"linux-64"`, `"osx-64"`, `"osx-arm64"`,
+#'   `"win-64"`, `"noarch"`). Defaults to `NULL`.
+#'   On Apple Silicon, `condathis` may fall back to `"osx-64"` when Rosetta 2
+#'   is available and packages are not available for `"osx-arm64"`.
 #' @inheritParams run
+#' @param overwrite Logical value that controls whether an existing environment
+#'   should always be recreated. Defaults to `FALSE`.
 #'
-#' @param overwrite Logical. Should environment always be overwritten?
-#'     Defaults to `FALSE`.
-#'
-#' @returns An object of class `list` representing the result of the command
-#'   execution. Contains information about the standard output, standard error,
-#'   and exit status of the command.
+#' @returns A process result list (from `processx::run()`) with command output,
+#'   error output, exit status, and timeout information.
 #'
 #' @examples
 #' \dontrun{
 #' condathis::with_sandbox_dir({
 #'   # Create a Conda environment and install the CLI `fastqc` in it.
+#'   # Explicitly using the channel `bioconda` and version `0.12.1`.
 #'   condathis::create_env(
-#'     packages = "fastqc==0.12.1",
+#'     packages = "bioconda::fastqc==0.12.1",
 #'     env_name = "fastqc-env",
 #'     verbose = "output"
 #'   )
-#'   #> ! Environment fastqc-env succesfully created.
 #' })
 #' }
 #' @export
@@ -61,12 +52,17 @@ create_env <- function(
   env_file = NULL,
   env_name = "condathis-env",
   channels = c(
-    "bioconda",
-    "conda-forge"
+    "conda-forge",
+    "bioconda"
   ),
   method = c(
     "native",
     "auto"
+  ),
+  channel_priority = c(
+    "disabled",
+    "strict",
+    "flexible"
   ),
   additional_channels = NULL,
   platform = NULL,
@@ -79,23 +75,26 @@ create_env <- function(
   ),
   overwrite = FALSE
 ) {
+  # workaround for a bug in some versions of libmamba where they check for
+  # + pkgs_dir in the home directory even when defining it elsewhere.
   pkgs_dir <- fs::path_home(".mamba", "pkgs")
-  pkgs_already_exists <- FALSE
+  pkgs_dir_already_exists <- FALSE
   if (isTRUE(stringr::str_detect(get_sys_arch(), "^Windows"))) {
     pkgs_dir <- base::Sys.getenv(
       x = "APPDATA",
-      unset = fs::path_home("AppData", "Roaming")
+      unset = fs::path_home("AppData", "Roaming"),
+      names = FALSE
     )
     pkgs_dir <- fs::path(pkgs_dir, ".mamba", "pkgs")
   }
   if (isFALSE(fs::dir_exists(pkgs_dir))) {
     fs::dir_create(pkgs_dir)
   } else {
-    pkgs_already_exists <- TRUE
+    pkgs_dir_already_exists <- TRUE
   }
   withr::defer(expr = {
     if (
-      isFALSE(pkgs_already_exists) &&
+      isFALSE(pkgs_dir_already_exists) &&
         fs::dir_exists(base::dirname(pkgs_dir))
     ) {
       invisible(rlang::catch_cnd(
@@ -106,6 +105,18 @@ create_env <- function(
     }
   })
 
+  if (isFALSE(rlang::is_bool(overwrite))) {
+    cli::cli_abort(
+      message = c(
+        `x` = "Argument {.arg overwrite} needs to be a {.cls logical} value."
+      ),
+      class = "condathis_create_invalid_overwrite_arg"
+    )
+  }
+
+  channel_priority_args <- parse_strategy_channel_priority(
+    channel_priority = channel_priority
+  )
   method <- rlang::arg_match(method)
 
   verbose_list <- parse_strategy_verbose(verbose = verbose)
@@ -130,19 +141,6 @@ create_env <- function(
     packages_arg <- packages
   }
 
-  # if (isFALSE(rlang::is_null(packages))) {
-  #   if (rlang::is_character(packages)) {
-  #     packages_arg <- packages
-  #   } else {
-  #     cli::cli_abort(
-  #       message = c(
-  #         `x` = "{.field packages} need to be a {.cls character} vector."
-  #       ),
-  #       class = "condathis_create_invalid_packages_arg"
-  #     )
-  #   }
-  # }
-
   channels_arg <- format_channels_args(
     channels,
     additional_channels
@@ -154,7 +152,10 @@ create_env <- function(
       packages = packages,
       platform = platform,
       channels = channels,
-      additional_channels = additional_channels
+      channel_priority = channel_priority,
+      additional_channels = additional_channels,
+      # verbose = verbose_list$internal_verbose
+      verbose = "silent"
     )
   } else {
     platform_args <- NULL
@@ -165,22 +166,20 @@ create_env <- function(
   }
 
   if (isTRUE(method %in% c("native", "auto"))) {
-    if (env_exists(env_name = env_name) && isFALSE(overwrite)) {
-      pkg_list_res <- list_packages(
+    # Check if required versions are satisfied even when
+    # + `overwrite` is false.
+    if (
+      isFALSE(overwrite) &&
+        # rlang::is_null(env_file) &&
+        isTRUE(length(packages) > 0L) &&
+        env_exists(env_name = env_name, verbose = "silent")
+    ) {
+      is_satisfied_vector <- satisfies_dependencies(
+        pkg_str_vector = packages,
         env_name = env_name,
-        verbose = verbose_list$internal_verbose
+        verbose = "silent"
       )
-      pkg_present_vector <- vector(mode = "logical", length = length(packages))
-      for (i in seq_along(packages)) {
-        pkg_name_str <- stringr::str_remove(packages[i], "[=<>~!].*")
-        if (pkg_name_str %in% pkg_list_res$name) {
-          pkg_present_vector[i] <- TRUE
-        } else {
-          pkg_present_vector[i] <- FALSE
-        }
-      }
-
-      if (isTRUE(all(pkg_present_vector))) {
+      if (isTRUE(all(is_satisfied_vector))) {
         if (isTRUE(verbose_list$strategy %in% c("full", "output"))) {
           cli::cli_inform(
             message = c(
@@ -188,13 +187,15 @@ create_env <- function(
             )
           )
         }
-        return(
-          invisible(
-            list(status = 0L, stdout = "", stderr = "", timeout = FALSE)
-          )
-        )
+        return(invisible(
+          list(status = 0L, stdout = "", stderr = "", timeout = FALSE)
+        ))
       }
     }
+
+    # Workaround for when directory already exists by other reasons.
+    # + When micromamba fail to create an environment with a different platform
+    # + than the native one, it leaves the directory there and do not overwrite.
     if (
       isFALSE(env_exists(env_name)) &&
         isTRUE(fs::dir_exists(get_env_dir(env_name = env_name)))
@@ -211,9 +212,8 @@ create_env <- function(
             env_name,
             "--yes",
             verbose_list$quiet_flag,
-            "--no-channel-priority",
             "--override-channels",
-            "--channel-priority=0",
+            channel_priority_args,
             channels_arg,
             platform_args
           ),

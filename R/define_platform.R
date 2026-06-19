@@ -1,6 +1,24 @@
-#' Define Platform to be used by `create_env()`.
+#' Resolve platform arguments for environment creation
 #'
-#' @inheritParams create_env
+#' Determines whether `--platform` should be set for `micromamba create`.
+#' On Apple Silicon, this helper can fallback to `osx-64` when Rosetta 2 is
+#' available and package availability requires it.
+#'
+#' @param packages Character vector of package MatchSpec strings.
+#' @param platform Character string with a user-specified platform.
+#'   Defaults to `NULL`.
+#' @param channels Character vector with channel names.
+#'   Defaults to `c("conda-forge", "bioconda")`.
+#' @param channel_priority Character string with channel priority mode.
+#'   Supported values are `"disabled"`, `"strict"`, and `"flexible"`.
+#'   Defaults to `"disabled"`.
+#' @param additional_channels Character vector of additional channels.
+#'   Defaults to `NULL`.
+#' @param verbose Character string controlling console output.
+#'   Defaults to `"silent"`.
+#'
+#' @returns A character vector with platform CLI arguments, or `NULL` when no
+#'   platform override is needed.
 #'
 #' @keywords internal
 #' @noRd
@@ -8,12 +26,18 @@ define_platform <- function(
   packages,
   platform = NULL,
   channels = c(
-    "bioconda",
-    "conda-forge"
+    "conda-forge",
+    "bioconda"
   ),
-  additional_channels = NULL
+  channel_priority = c(
+    "disabled",
+    "strict",
+    "flexible"
+  ),
+  additional_channels = NULL,
+  verbose = "silent"
 ) {
-  if (is.null(platform)) {
+  if (rlang::is_null(platform)) {
     platform_args <- NULL
   } else {
     platform_args <- c("--platform", platform)
@@ -21,13 +45,14 @@ define_platform <- function(
 
   sys_arch <- get_sys_arch()
 
-  if (isTRUE(sys_arch == "Darwin-arm64") && is.null(platform)) {
+  if (identical(sys_arch, "Darwin-arm64") && rlang::is_null(platform)) {
     native_res <- packages_search_native(
       packages = packages,
       channels = channels,
-      # method = "native",
+      channel_priority = channel_priority,
+      additional_channels = additional_channels,
       platform = "osx-arm64",
-      additional_channels = additional_channels
+      verbose = verbose
     )
     if (isFALSE(native_res)) {
       px_res <- processx::run(
@@ -38,13 +63,14 @@ define_platform <- function(
         echo = FALSE,
         echo_cmd = FALSE
       )
-      if (isTRUE(px_res$status == 0)) {
+      if (identical(px_res$status, 0L)) {
         rosetta_res <- packages_search_native(
           packages = packages,
           channels = channels,
-          # method = "native",
+          channel_priority = channel_priority,
+          additional_channels = additional_channels,
           platform = "osx-64",
-          additional_channels = additional_channels
+          verbose = verbose
         )
       } else {
         cli::cli_inform(c(

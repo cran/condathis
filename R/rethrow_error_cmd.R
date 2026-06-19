@@ -1,3 +1,12 @@
+#' Re-throw command execution errors with condathis classes
+#'
+#' @param expr Expression to evaluate.
+#' @param env Environment used to evaluate `expr`.
+#'   Defaults to `parent.frame()`.
+#'
+#' @returns The evaluated `expr` result when no captured error is present.
+#'   Otherwise aborts with a `condathis` error class.
+#'
 #' @keywords internal
 #' @noRd
 rethrow_error_cmd <- function(expr, env = parent.frame()) {
@@ -9,7 +18,7 @@ rethrow_error_cmd <- function(expr, env = parent.frame()) {
     classes = c("system_command_status_error", "rlib_error_3_0", "c_error")
   )
 
-  if (isFALSE(is.null(err_cnd))) {
+  if (isFALSE(rlang::is_null(err_cnd))) {
     additional_lines <- NULL
     if (isTRUE("stderr" %in% names(err_cnd))) {
       err_vector <- stringr::str_replace_all(

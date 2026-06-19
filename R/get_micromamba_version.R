@@ -1,3 +1,12 @@
+#' Get the installed micromamba version
+#'
+#' @param umamba_path Character path to the micromamba executable.
+#'   Defaults to `NULL`, which uses `micromamba_bin_path()`.
+#'
+#' @returns A character string with the micromamba version.
+#'
+#' @keywords internal
+#' @noRd
 get_micromamba_version <- function(umamba_path = NULL) {
   if (rlang::is_null(umamba_path)) {
     umamba_path <- micromamba_bin_path()
@@ -25,10 +34,10 @@ get_micromamba_version <- function(umamba_path = NULL) {
     stderr = NULL,
     error_on_status = FALSE
   )
-  version_string <- parse_output(px_res)
+  version_string <- parse_output(px_res, stream = "both")
   version_string <- stringr::str_extract(
     version_string,
-    pattern = r"(\d+\.\d+\.\d+)"
+    pattern = stringr::regex(r"(\d+\.\d+\.\d+)")
   )
   if (isTRUE(rlang::is_chr_na(version_string))) {
     cli::cli_abort(

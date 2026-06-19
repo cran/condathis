@@ -1,3 +1,13 @@
+#' Check whether a compatible micromamba version is available
+#'
+#' @param umamba_path Character path to the micromamba executable.
+#'   Defaults to `NULL`, which uses `micromamba_bin_path()`.
+#'
+#' @returns Logical. `TRUE` if a compatible version of micromamba is available,
+#'   `FALSE` otherwise.
+#'
+#' @keywords internal
+#' @noRd
 is_umamba_version_available <- function(umamba_path = NULL) {
   cnd_res <- rlang::catch_cnd(
     expr = {

@@ -1,3 +1,49 @@
+## condathis 0.1.4
+
+Release Date: 2026-06-19
+
+Development Changelog: [0.1.4](https://github.com/luciorq/condathis/compare/v0.1.3...v0.1.4)
+
+### Added
+
+* New `channel_priority` argument in `create_env()` and `install_packages()`
+  to control channel priority strategy.
+
+* Condathis now support system installed `micromamba` binaries.
+  For that we added 1 new option and 1 environment variable to control that behavior.
+  `condathis_micromamba_path` and `"CONDATHIS_MICROMAMBA_PATH"` respectively.
+  The order of discovey is as follows:
+  * User override via `getOption("condathis.micromamba_path")`.
+  * User override via `CONDATHIS_MICROMAMBA_PATH` environment variable.
+  * condathis internal managed path (`micromamba_bin_path()`).
+  * R-in-conda: micromamba adjacent to R's own installation prefix.
+  * Active conda environment (`CONDA_PREFIX`).
+  * condathis managed micromamba-env fallback.
+  * System PATH (`Sys.which("micromamba")`).
+
+### Changed
+
+* Internal `micromamba` version bump to "2.8.1-0".
+
+* `clean_cache()` now also removes any additional cache files created in the
+  path reported by `tools::R_user_dir(package = "condathis", which = "cache")`.
+
+* Order of `channels` argument changed to have `"conda-forge"` as the first
+  option as for using `channel_priority = "strict"` the order of the channels
+  matters.
+  Note that relying solely on channel order for priority is not recommended.
+  Use explicit syntax like: `bioconda::samtools==X.Y.Z` for better guarantee
+  of reproducibility.
+
+* `create_env()` now properly parses MatchSpec version constraints strings to
+  define if environment need to be recreated using new internal functions
+  `parse_match_spec()` and `version_spec_contains()` to parse Conda MatchSpec
+  and use VersionSpec to compare versions, following CEP29 and CEP33, respectively.
+
+### Fixed
+
+* Fix error in `create_env()` when packages were specified with `"channel::package"` environment was always recreated.
+
 ## condathis 0.1.3
 
 Release Date: 2025-11-07
@@ -213,12 +259,15 @@ Development Changelog: [0.1.0](https://github.com/luciorq/condathis/compare/v0.0
 
 * Internal `micromamba` version is upgraded to "2.0.2-0", fixes warnings about
   missing prefixes (v0.0.3.9028).
+
 * The internal `micromamba` version is now fixed (currently "v2.0.1-0") (v0.0.3.9025).
+
 * Use GitHub releases as the primary URL for installing `micromamba` (v0.0.3.9025).
 
 * Move `--no-rc` and `--no-env` arguments to `native_cmd()` (v0.0.3.9024).
 
 * Fix path handling in Windows (v0.0.3.9023).
+
 * Add `mode = "wb"` to internal `download.file()` for handling binary downloads
 in Windows (v0.0.3.9023).
 

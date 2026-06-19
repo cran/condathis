@@ -1,19 +1,20 @@
-#' Clean Conda Cache
+#' Clean Conda cache
 #'
-#' This function cleans the Conda cache by removing all packages and tarballs
-#' from the local cache directory. It is useful for freeing up disk space
-#' and ensuring that the cache does not contain outdated or unnecessary files.
+#' Removes cached packages and archives from the `condathis` Conda root.
+#' Also removes files from the package cache directory returned by
+#' `tools::R_user_dir(package = "condathis", which = "cache")`.
 #'
-#' @param verbose A character string indicating the verbosity level of the
-#'  output. It can be one of "silent", "cmd", "output", or "full".
-#'  The default is "output".
+#' @param verbose Character string controlling console output.
+#'   Supported values are `"output"`, `"silent"`, `"cmd"`, `"spinner"`,
+#'   and `"full"`. Defaults to `"output"`.
 #'
-#' @returns Invisibly returns the result of the underlying command executed.
+#' @returns A process result list (from `processx::run()`) with command output,
+#'   error output, exit status, and timeout information.
 #'
 #' @details
-#' Packages that are still linked with existing environments are not be
-#' removed. If you expect to clean the whole cache, consider removing
-#' all existing environments first using `list_envs()` and `remove_env()`.
+#' Package files still referenced by existing environments may not be removed.
+#' To maximize cleanup, remove environments first with `list_envs()` and
+#' `remove_env()`.
 #'
 #' @examples
 #' \dontrun{
@@ -40,6 +41,7 @@ clean_cache <- function(
         conda_args = c(
           "--all",
           "--yes",
+          "--force-pkgs-dirs",
           verbose_list$quiet_flag
         ),
         verbose = verbose_list,
@@ -48,10 +50,20 @@ clean_cache <- function(
     }
   )
 
+  r_user_cache <- fs::path(
+    tools::R_user_dir(package = "condathis", which = "cache")
+  )
+
+  if (fs::dir_exists(r_user_cache)) {
+    for (content_item in fs::dir_ls(r_user_cache)) {
+      fs::file_delete(content_item)
+    }
+  }
+
   if (isTRUE(verbose_list$strategy %in% c("full", "output"))) {
     cli::cli_inform(
       message = c(
-        `!` = "Cache succesfully removed."
+        `!` = "Cache successfully removed."
       )
     )
   }

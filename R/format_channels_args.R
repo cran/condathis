@@ -1,14 +1,18 @@
-#' Format Channels Arguments
-#' @param ... Character. Channels to be used by `micromamba`.
+#' Build CLI channel arguments
+#'
+#' @param ... Unnamed character vectors with channel names.
+#'
+#' @returns A character vector with repeated `-c <channel>` pairs.
+#'
 #' @keywords internal
 #' @noRd
 format_channels_args <- function(...) {
   rlang::check_dots_unnamed()
   channels <- c(...)
-  if (is.null(channels)) {
+  if (rlang::is_null(channels)) {
     channels <- c(
-      "bioconda",
-      "conda-forge"
+      "conda-forge",
+      "bioconda"
     )
   }
   channels_arg <- c()

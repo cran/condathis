@@ -2,7 +2,7 @@
 % Please edit documentation in R/list_packages.R
 \name{list_packages}
 \alias{list_packages}
-\title{List Packages Installed in a Conda Environment}
+\title{List packages in a Conda environment}
 \usage{
 list_packages(
   env_name = "condathis-env",
@@ -10,57 +10,35 @@ list_packages(
 )
 }
 \arguments{
-\item{env_name}{Character. The name of the Conda environment where the tool
-will be run. Defaults to \code{"condathis-env"}.
-If the specified environment does not exist,
-it will be created automatically using \code{create_env()}.}
+\item{env_name}{Character string with the target environment name.
+Defaults to \code{"condathis-env"}.}
 
-\item{verbose}{Character string specifying the verbosity level of the
-function's output.
-Acceptable values are:
-\itemize{
-\item \strong{"output"}: Print the standard output and error from the command-line
-tool to the screen.
-Note that the order of the standard output and error lines may not be
-correct, as standard output is typically buffered.
-\item \strong{"silent"}: Suppress all output from internal command-line tools.
-Equivalent to \code{FALSE}.
-\item \strong{"cmd"}: Print the internal command(s) passed to the command-line tool.
-If the standard output and/or error is redirected to a file or they are
-ignored, they will not be echoed.
-Equivalent to \code{TRUE}.
-\item \strong{"full"}: Print both the internal command(s) (\code{"cmd"}) and their
-standard output and error (\code{"output"}).
-\item Logical values \code{FALSE} and \code{TRUE} are also accepted for backward
-compatibility but are \emph{soft-deprecated}.
-Please use \code{"silent"} or \code{"output"} instead.
-}}
+\item{verbose}{Character string controlling console output.
+Supported values are \code{"output"}, \code{"silent"}, \code{"cmd"}, \code{"spinner"},
+and \code{"full"}. Defaults to \code{"output"}.}
 }
 \value{
-A tibble containing all the packages installed in the specified environment,
-with the following columns:
-\describe{
-\item{base_url}{The base URL of the package source.}
-\item{build_number}{The build number of the package.}
-\item{build_string}{The build string describing the package build details.}
-\item{channel}{The channel from which the package was installed.}
-\item{dist_name}{The distribution name of the package.}
-\item{name}{The name of the package.}
-\item{platform}{The platform for which the package is built.}
-\item{version}{The version of the package.}
+A data frame (\code{tibble}) with installed packages and the columns:
+\itemize{
+\item \strong{base_url}: The base URL of the package source.
+\item \strong{build_number}: The build number of the package.
+\item \strong{build_string}: The build string describing the package build details.
+\item \strong{channel}: The channel from which the package was installed.
+\item \strong{dist_name}: The distribution name of the package.
+\item \strong{name}: The name of the package.
+\item \strong{platform}: The platform for which the package is built.
+\item \strong{version}: The version of the package.
 }
 }
 \description{
-This function retrieves a list of all packages installed in the specified Conda
-environment. The result is returned as a tibble with detailed information about
-each package, including its name, version, and source details.
+Returns package metadata for a Conda environment as a tibble.
 }
 \examples{
 \dontrun{
 condathis::with_sandbox_dir({
   # Creates a Conda environment with the CLI `fastqc`
   condathis::create_env(
-    packages = "fastqc",
+    packages = "bioconda::fastqc",
     env_name = "fastqc-env"
   )
   # Lists the packages in env `fastqc-env`
@@ -69,4 +47,5 @@ condathis::with_sandbox_dir({
   #> [1] 34  8
 })
 }
+
 }

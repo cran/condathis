@@ -2,69 +2,56 @@
 % Please edit documentation in R/install_packages.R
 \name{install_packages}
 \alias{install_packages}
-\title{Install Packages in a Existing Conda Environment}
+\title{Install packages in a Conda environment}
 \usage{
 install_packages(
   packages,
   env_name = "condathis-env",
-  channels = c("bioconda", "conda-forge"),
+  channels = c("conda-forge", "bioconda"),
+  channel_priority = c("disabled", "strict", "flexible"),
   additional_channels = NULL,
   verbose = c("output", "silent", "cmd", "spinner", "full")
 )
 }
 \arguments{
-\item{packages}{Character vector with the names of the packages and
-version strings if necessary.}
+\item{packages}{Character vector of package MatchSpec strings to install.}
 
-\item{env_name}{Name of the Conda environment where the packages are
-going to be installed. Defaults to 'condathis-env'.}
+\item{env_name}{Character string with the target environment name.
+Defaults to \code{"condathis-env"}.}
 
-\item{channels}{Character vector. Names of the channels to be included.
-By default 'c("bioconda", "conda-forge")' are used for solving
-dependencies.}
+\item{channels}{Character vector with channel names used for dependency
+resolution. Defaults to \code{c("conda-forge", "bioconda")}.}
 
-\item{additional_channels}{Character. Additional Channels to be added to the
-default ones.}
+\item{channel_priority}{Character string with channel priority mode.
+Supported values are \code{"disabled"}, \code{"strict"}, and \code{"flexible"}.
+Defaults to \code{"disabled"}.}
 
-\item{verbose}{Character string specifying the verbosity level of the
-function's output.
-Acceptable values are:
-\itemize{
-\item \strong{"output"}: Print the standard output and error from the command-line
-tool to the screen.
-Note that the order of the standard output and error lines may not be
-correct, as standard output is typically buffered.
-\item \strong{"silent"}: Suppress all output from internal command-line tools.
-Equivalent to \code{FALSE}.
-\item \strong{"cmd"}: Print the internal command(s) passed to the command-line tool.
-If the standard output and/or error is redirected to a file or they are
-ignored, they will not be echoed.
-Equivalent to \code{TRUE}.
-\item \strong{"full"}: Print both the internal command(s) (\code{"cmd"}) and their
-standard output and error (\code{"output"}).
-\item Logical values \code{FALSE} and \code{TRUE} are also accepted for backward
-compatibility but are \emph{soft-deprecated}.
-Please use \code{"silent"} or \code{"output"} instead.
-}}
+\item{additional_channels}{Character vector of additional channels appended
+to \code{channels}. Defaults to \code{NULL}.}
+
+\item{verbose}{Character string controlling console output.
+Supported values are \code{"output"}, \code{"silent"}, \code{"cmd"}, \code{"spinner"},
+and \code{"full"}. Defaults to \code{"output"}.}
 }
 \value{
-An object of class \code{list} representing the result of the command
-execution. Contains information about the standard output, standard error,
-and exit status of the command.
+A process result list (from \code{processx::run()}) with command output,
+error output, exit status, and timeout information.
 }
 \description{
-Install Packages in a Existing Conda Environment
+Installs packages into an existing \code{condathis} environment.
+If the target environment does not exist, it is created first.
 }
 \examples{
 \dontrun{
 condathis::with_sandbox_dir({
   condathis::create_env(
-    packages = "fastqc",
+    packages = "bioconda::fastqc",
     env_name = "fastqc-env"
   )
   # Install the package `python` in the `fastqc-env` environment.
-  # It is not recommended to install multiple packages in the same environment,
-  #  # as it defeats the purpose of isolation provided by separate environments.
+  # NOTE: It is not recommended to install multiple packages in the same
+  # environment, as it defeats the purpose of isolation provided by
+  # separate environments.
   condathis::install_packages(packages = "python", env_name = "fastqc-env")
 })
 }

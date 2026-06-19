@@ -2,14 +2,15 @@
 % Please edit documentation in R/create_env.R
 \name{create_env}
 \alias{create_env}
-\title{Create a Conda Environment}
+\title{Create a Conda environment}
 \usage{
 create_env(
   packages = NULL,
   env_file = NULL,
   env_name = "condathis-env",
-  channels = c("bioconda", "conda-forge"),
+  channels = c("conda-forge", "bioconda"),
   method = c("native", "auto"),
+  channel_priority = c("disabled", "strict", "flexible"),
   additional_channels = NULL,
   platform = NULL,
   verbose = c("output", "silent", "cmd", "spinner", "full"),
@@ -17,80 +18,65 @@ create_env(
 )
 }
 \arguments{
-\item{packages}{Character vector. Names of the packages, and
-version strings if necessary, e.g. 'python=3.13'. The use of the \code{packages}
-argument assumes that env_file is not used.}
+\item{packages}{Character vector of package MatchSpec strings.
+Examples: \code{"python=3.13"}, \code{"bioconda::fastqc==0.12.1"}.
+Defaults to \code{NULL}.}
 
-\item{env_file}{Character. Path to the YAML file with Conda Environment
-description. If this argument is used, the \code{packages} argument should not
-be included in the command.}
+\item{env_file}{Character string with the path to an environment YAML file.
+Defaults to \code{NULL}.
+When provided, it is passed to \verb{micromamba create -f}.}
 
-\item{env_name}{Character. Name of the Conda environment where the packages
-are going to be installed. Defaults to 'condathis-env'.}
+\item{env_name}{Character string with the target environment name.
+Defaults to \code{"condathis-env"}.}
 
-\item{channels}{Character vector. Names of the channels to be included.
-By default 'c("bioconda", "conda-forge")' are used for solving
-dependencies.}
+\item{channels}{Character vector with channel names used for dependency
+resolution. Defaults to \code{c("conda-forge", "bioconda")}.}
 
-\item{method}{Character. Backend method to run \code{micromamba}, the default is
-"auto" running "native" with the \code{micromamba} binaries installed
-by \code{condathis}.
-This argument is \strong{soft deprecated} as changing it don't really do
-anything.}
+\item{method}{Character string with the backend execution strategy.
+Supported values are \code{"native"} and \code{"auto"}.
+Defaults to \code{"native"}.
+This argument is soft-deprecated and currently does not change behavior.}
 
-\item{additional_channels}{Character. Additional Channels to be added to the
-default ones.}
+\item{channel_priority}{Character string with channel priority mode.
+Supported values are \code{"disabled"}, \code{"strict"}, and \code{"flexible"}.
+Defaults to \code{"disabled"}.}
 
-\item{platform}{Character. Platform to search for \code{packages}.
-Defaults to \code{NULL} which will use the current platform.
-E.g. "linux-64", "linux-32", "osx-64", "win-64", "win-32", "noarch".
-Note: on Apple Silicon MacOS will use "osx-64" instead of "osx-arm64"
-if Rosetta 2 is available and any of the \code{packages} is not available
-for "osx-arm64".}
+\item{additional_channels}{Character vector of additional channels appended
+to \code{channels}. Defaults to \code{NULL}.}
 
-\item{verbose}{Character string specifying the verbosity level of the
-function's output.
-Acceptable values are:
-\itemize{
-\item \strong{"output"}: Print the standard output and error from the command-line
-tool to the screen.
-Note that the order of the standard output and error lines may not be
-correct, as standard output is typically buffered.
-\item \strong{"silent"}: Suppress all output from internal command-line tools.
-Equivalent to \code{FALSE}.
-\item \strong{"cmd"}: Print the internal command(s) passed to the command-line tool.
-If the standard output and/or error is redirected to a file or they are
-ignored, they will not be echoed.
-Equivalent to \code{TRUE}.
-\item \strong{"full"}: Print both the internal command(s) (\code{"cmd"}) and their
-standard output and error (\code{"output"}).
-\item Logical values \code{FALSE} and \code{TRUE} are also accepted for backward
-compatibility but are \emph{soft-deprecated}.
-Please use \code{"silent"} or \code{"output"} instead.
-}}
+\item{platform}{Character string with the platform used for dependency
+solving (for example, \code{"linux-64"}, \code{"osx-64"}, \code{"osx-arm64"},
+\code{"win-64"}, \code{"noarch"}). Defaults to \code{NULL}.
+On Apple Silicon, \code{condathis} may fall back to \code{"osx-64"} when Rosetta 2
+is available and packages are not available for \code{"osx-arm64"}.}
 
-\item{overwrite}{Logical. Should environment always be overwritten?
-Defaults to \code{FALSE}.}
+\item{verbose}{Character string controlling console output.
+Supported values are \code{"output"}, \code{"silent"}, \code{"cmd"}, \code{"spinner"},
+and \code{"full"}. Defaults to \code{"output"}.
+Logical values are accepted for backward compatibility:
+\code{TRUE} maps to \code{"output"} and \code{FALSE} maps to \code{"silent"}.}
+
+\item{overwrite}{Logical value that controls whether an existing environment
+should always be recreated. Defaults to \code{FALSE}.}
 }
 \value{
-An object of class \code{list} representing the result of the command
-execution. Contains information about the standard output, standard error,
-and exit status of the command.
+A process result list (from \code{processx::run()}) with command output,
+error output, exit status, and timeout information.
 }
 \description{
-Create Conda Environment with specific packages installed to be used
-by \code{run()}.
+Creates a Conda environment managed by \code{condathis} and installs dependencies
+from package specs or from an environment file.
 }
 \examples{
 \dontrun{
 condathis::with_sandbox_dir({
   # Create a Conda environment and install the CLI `fastqc` in it.
+  # Explicitly using the channel `bioconda` and version `0.12.1`.
   condathis::create_env(
-    packages = "fastqc==0.12.1",
+    packages = "bioconda::fastqc==0.12.1",
     env_name = "fastqc-env",
     verbose = "output"
   )
-  #> ! Environment fastqc-env succesfully created.
 })
 }
 }

@@ -1,22 +1,20 @@
-#' List Installed Conda Environments
+#' List Conda environments managed by condathis
 #'
-#' This function retrieves a list of Conda environments installed in the `{condathis}`
-#' environment directory. The returned value excludes any environments unrelated
-#' to `{condathis}`, such as the base Conda environment itself.
+#' Returns environment names located under the `condathis` installation root.
+#' Environments not managed by `condathis` are excluded.
 #'
-#' @param verbose A character string indicating the verbosity level for the command.
+#' @param verbose Character string controlling console output.
 #'   Defaults to `"silent"`.
-#'   See [condathis::run()] for details.
 #'
-#' @returns A character vector containing the names of installed Conda environments.
-#'   If the command fails, the function returns the process exit status as a numeric value.
+#' @returns A character vector of environment names.
+#'   If the command fails, returns the process exit status as a numeric value.
 #'
 #' @examples
 #' \dontrun{
 #' condathis::with_sandbox_dir({
 #'   # Create environments
 #'   condathis::create_env(
-#'     packages = "fastqc",
+#'     packages = "bioconda::fastqc",
 #'     env_name = "fastqc-env"
 #'   )
 #'   condathis::create_env(
@@ -46,7 +44,7 @@ list_envs <- function(verbose = "silent") {
       )
     }
   )
-  if (isTRUE(px_res$status == 0L)) {
+  if (identical(px_res$status, 0L)) {
     envs_list <- jsonlite::fromJSON(px_res$stdout)
     envs_str <- base::normalizePath(envs_list$envs, mustWork = FALSE)
     envs_str <- fs::path_real(envs_str)
